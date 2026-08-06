@@ -23,3 +23,46 @@ it('returns the ProgressEvent instance', () => {
   expect(event.loaded).toBe(100)
   expect(event.total).toBe(500)
 })
+
+it('marks the ProgressEvent as length-computable when the total is known', () => {
+  const event = createEvent(request, 'load', {
+    loaded: 100,
+    total: 500,
+  }) as ProgressEvent
+
+  expect(event.lengthComputable).toBe(true)
+})
+
+it('marks the ProgressEvent as not length-computable when the total is unknown', () => {
+  const event = createEvent(request, 'load', {
+    loaded: 0,
+    total: 0,
+  }) as ProgressEvent
+
+  expect(event.lengthComputable).toBe(false)
+  expect(
+    (createEvent(request, 'loadstart') as ProgressEvent).lengthComputable
+  ).toBe(false)
+})
+
+it('respects an explicit "lengthComputable" value', () => {
+  expect(
+    (
+      createEvent(request, 'progress', {
+        loaded: 0,
+        total: 0,
+        lengthComputable: true,
+      }) as ProgressEvent
+    ).lengthComputable
+  ).toBe(true)
+
+  expect(
+    (
+      createEvent(request, 'progress', {
+        loaded: 100,
+        total: 500,
+        lengthComputable: false,
+      }) as ProgressEvent
+    ).lengthComputable
+  ).toBe(false)
+})

@@ -314,9 +314,12 @@ export class XMLHttpRequestController {
     let uploadComplete = false
 
     if (this[kFetchRequest]) {
-      const requestBodyLength = await getBodyByteLength(
-        this[kFetchRequest].clone()
-      )
+      /**
+       * @note When the body length cannot be computed, fall back to 0 so the
+       * progress events are dispatched as not length-computable.
+       */
+      const requestBodyLength =
+        (await getBodyByteLength(this[kFetchRequest].clone())) ?? 0
 
       // 5. If this’s upload complete flag is unset and this’s upload listener flag is set, then fire a progress event named loadstart at this’s upload object with requestBodyTransmitted and requestBodyLength.
       if (!uploadComplete) {

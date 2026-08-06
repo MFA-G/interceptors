@@ -15,6 +15,29 @@ it('returns explicit body length set in the "Content-Length" header', async () =
   ).resolves.toBe(5)
 })
 
+it('returns null for a non-numeric "Content-Length" header', async () => {
+  await expect(
+    getBodyByteLength(
+      new Request(url, { headers: { 'Content-Length': 'not-a-number' } })
+    )
+  ).resolves.toBe(null)
+
+  await expect(
+    getBodyByteLength(
+      new Response('hello', { headers: { 'Content-Length': 'not-a-number' } })
+    )
+  ).resolves.toBe(null)
+})
+
+it('returns null if reading the body throws', async () => {
+  const response = new Response('hello world')
+  vi.spyOn(response, 'arrayBuffer').mockRejectedValue(
+    new Error('Failed to read the body')
+  )
+
+  await expect(getBodyByteLength(response)).resolves.toBe(null)
+})
+
 /**
  * Request.
  */

@@ -26,11 +26,18 @@ export function createEvent(
     ? ProgressEvent
     : ProgressEventPolyfill
 
+  const total = init?.total || 0
+
   const event = progressEvents.includes(type)
     ? new ProgressEventClass(type, {
-        lengthComputable: true,
+        /**
+         * @note Per spec, a progress event is length-computable only when
+         * the total length is known, i.e. when `length` is not 0.
+         * @see https://xhr.spec.whatwg.org/#concept-event-fire-progress
+         */
+        lengthComputable: init?.lengthComputable ?? total !== 0,
         loaded: init?.loaded || 0,
-        total: init?.total || 0,
+        total,
       })
     : new EventPolyfill(type, {
         target,
